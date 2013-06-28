@@ -1,17 +1,16 @@
-
 #include <stdlib.h>
 #include <string.h>
 #include "azm_heap.h"
 
-#define heap_parent(index) ((int)(((index) - 1) / 2))
+#define azm_heap_parent(index) ((int)(((index) - 1) / 2))
 
-#define heap_left(index) (((index) * 2) + 1)
+#define azm_heap_left(index) (((index) * 2) + 1)
 
-#define heap_right(index) (((index) * 2) + 2)
+#define azm_heap_right(index) (((index) * 2) + 2)
 
 
-void heap_init(
-            Heap *heap,
+void azm_heap_init(
+            azm_heap *heap,
             int (*cmp)(const void *, const void *),
             void (*destroy)(void *))
 {
@@ -24,36 +23,36 @@ void heap_init(
 
 
 
-void heap_dealloc(Heap *heap)
+void azm_heap_dealloc(azm_heap *heap)
 {
     int i;
     if(heap->destroy != NULL) {
-        for(i = 0; i < heap_size(heap); i++) {
+        for(i = 0; i < azm_heap_size(heap); i++) {
                 heap->destroy(heap->tree[i]);
         }
     }
 
     free(heap->tree);
 
-    memset(heap, 0, sizeof(Heap));
+    memset(heap, 0, sizeof(azm_heap));
     return ;
 }
 
-int heap_insert(Heap *heap, const void *data)
+int azm_heap_insert(azm_heap *heap, const void *data)
 {
     void *tmp;
     int iindex, //
         pindex; //parent index
     if((tmp = (void **) realloc(heap->tree,
-            (heap_size(heap) + 1) * sizeof(void *))) == NULL) {
+            (azm_heap_size(heap) + 1) * sizeof(void *))) == NULL) {
             return -1;
     }
     else {
      heap->tree = tmp;
     }
     heap->tree[heap_size(heap)] = (void *) data;
-    iindex = heap_size(heap);
-    pindex = heap_parent(iindex);
+    iindex = azm_heap_size(heap);
+    pindex = azm_heap_parent(iindex);
     while(iindex > 0 &&
           heap->cmp(heap->tree[pindex], heap->tree[iindex]) < 0) {
 
@@ -61,7 +60,7 @@ int heap_insert(Heap *heap, const void *data)
         heap->tree[pindex] = heap->tree[iindex];
         heap->tree[iindex] = tmp;
         iindex = pindex;
-        pindex = heap_parent(iindex);
+        pindex = azm_heap_parent(iindex);
     }
 
     heap->size++;
@@ -69,7 +68,7 @@ int heap_insert(Heap *heap, const void *data)
     return 0;
 }
 
-int heap_extract(Heap *heap, void **data)
+int azm_heap_extract(azm_heap *heap, void **data)
 {
     void *save;
     void *tmp;
@@ -79,14 +78,14 @@ int heap_extract(Heap *heap, void **data)
         rindex,
         mindex;
 
-    if(heap_size(heap) == 0)
+    if(azm_heap_size(heap) == 0)
         return -1;
     *data = heap->tree[0];
-    save = heap->tree[heap_size(heap) - 1];
+    save = heap->tree[azm_heap_size(heap) - 1];
 
-    if (heap_size(heap) - 1 > 0) {
+    if (azm_heap_size(heap) - 1 > 0) {
         if((tmp = (void **) realloc(heap->tree,
-            (heap_size(heap) - 1) * sizeof(void *))) == NULL) {
+            (azm_heap_size(heap) - 1) * sizeof(void *))) == NULL) {
             return -1;
         }
         else {
@@ -105,10 +104,10 @@ int heap_extract(Heap *heap, void **data)
     heap->tree[0] = save;
     iindex = 0;
     while(1) {
-        lindex = heap_left(iindex);
-        rindex = heap_right(iindex);
+        lindex = azm_heap_left(iindex);
+        rindex = azm_heap_right(iindex);
 
-        if(lindex < heap_size(heap) &&
+        if(lindex < azm_heap_size(heap) &&
            heap->cmp(heap->tree[lindex], heap->tree[iindex]) > 0) {
             mindex = lindex;
         }
@@ -116,7 +115,7 @@ int heap_extract(Heap *heap, void **data)
             mindex = iindex;
         }
 
-        if(rindex < heap_size(heap) &&
+        if(rindex < azm_heap_size(heap) &&
            heap->cmp(heap->tree[rindex], heap->tree[mindex]) > 0) {
             mindex = rindex;
         }
